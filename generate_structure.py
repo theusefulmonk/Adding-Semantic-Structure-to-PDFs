@@ -32,6 +32,17 @@ converter = DocumentConverter(
                 )
             }
         )
+
+# A simple function to extract the data needed
+# could probably be done as a lambda, but this seems more readable.
+def mk_toc_item(docling_text_object):
+    '''Take an individual docling text object in a json tree and return a
+    dictionary in the format needed by pdfcpu'''
+    title = docling_text_object['text']
+    page = docling_text_object['prov'][0]['page_no']
+    bookmark = {'title': title, 'page': page}
+    return bookmark
+
 result = converter.convert(source)
 
 print(json.dumps(result.document.export_to_dict()))
