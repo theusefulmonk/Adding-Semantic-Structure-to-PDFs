@@ -36,13 +36,36 @@ converter = DocumentConverter(
 # A simple function to extract the data needed
 # could probably be done as a lambda, but this seems more readable.
 def mk_toc_item(docling_text_object):
-    '''Take an individual docling text object in a json tree and return a
+    '''Take an individual docling text object in a texts array and return a
     dictionary in the format needed by pdfcpu'''
     title = docling_text_object['text']
     page = docling_text_object['prov'][0]['page_no']
-    bookmark = {'title': title, 'page': page}
-    return bookmark
+    toc_item = {'title': title, 'page': page}
+    return toc_item
 
-result = converter.convert(source)
+def mk_toc(texts_array):
+    '''Take the texts array from the root of a docling json object and return a
+    a toc as dictionary in the format needed by pdfcpu'''
+    entry_list = [mk_toc_item(i) for i in texts_array if i['label'] == 'section_header']
+    toc = {"bookmarks": entry_list}
+    return toc
 
-print(json.dumps(result.document.export_to_dict()))
+def main():
+    # intermediate representation produced by Docling:
+    docling_result = converter.convert(source)
+
+    # json output from intermediate representation:
+    json_representation = docling_result.document.export_to_dict()
+
+    # the texts array:
+    document_texts = json_representation['texts']
+
+    # the toc derived from the texts array:
+    document_toc = mk_toc(document_texts)
+
+    # And now print it to stdout
+    print(json.dumps(document_toc))
+    # print(json.dumps(docling_document.document.export_to_dict()))
+
+if __name__ == "__main__":
+    main()
