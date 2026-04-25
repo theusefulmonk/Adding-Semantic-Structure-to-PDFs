@@ -66,7 +66,7 @@ def main():
     document_toc = mk_toc(document_texts)
 
     # And now print it to stdout
-    print(json.dumps(document_toc))
+    print(json.dumps(document_toc, ensure_ascii=False))
     # print(json.dumps(docling_document.document.export_to_dict()))
 
 if __name__ == "__main__":
