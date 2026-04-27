@@ -14,11 +14,15 @@ from docling.backend.docling_parse_v4_backend import DoclingParseV4DocumentBacke
 from docling.datamodel.pipeline_options import ThreadedPdfPipelineOptions
 import json
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('filename')
+parser.add_argument('-f', 
+                    '--full_structure', 
+                    help='Output the whole json document',
+                    action='store_true')
 args = parser.parse_args()
-
 source = args.filename
 
 pipeline_options = ThreadedPdfPipelineOptions(
@@ -58,6 +62,10 @@ def main():
 
     # json output from intermediate representation:
     json_representation = docling_result.document.export_to_dict()
+
+    if args.full_structure:
+        print(json.dumps(json_representation, ensure_ascii=False))
+        sys.exit()
 
     # the texts array:
     document_texts = json_representation['texts']
