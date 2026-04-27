@@ -66,12 +66,12 @@ args = parser.parse_args()
 
 # Inputs state
 source = args.filename
-should_print = True
+should_print = True #Default
 if args.noprint:
     should_print = False
 if args.delete:
     nodes_to_delete = [(lambda x: x - 1)(x) for x in args.delete]
-    print("Nodes to delete are: " + str(list(nodes_to_delete)))
+    print("Indices of nodes to delete are: " + str(list(nodes_to_delete)))
     #print(str(list(nodes_to_delete)))
 else:
     pass
@@ -110,6 +110,9 @@ if should_print:
 
 # Delete nodes
 if args.delete:
+    deletion_range = list(range(len(bookmarks)))
+    print("deletion range is " + str(deletion_range))
+    valid_deletions = filter(lambda x: nodes_to_delete.index(x) not in deletion_range , nodes_to_delete)
     new_bookmarks = filter(lambda x: bookmarks.index(x) not in nodes_to_delete , bookmarks)
     pprint(list(new_bookmarks))
 # bookmarks = list(filter(keep_node, bookmarks))
