@@ -15,12 +15,17 @@ from docling.datamodel.pipeline_options import ThreadedPdfPipelineOptions
 import json
 import argparse
 import sys
+import shelve
 
 parser = argparse.ArgumentParser()
 parser.add_argument('filename')
 parser.add_argument('-f', 
                     '--full_structure', 
                     help='Output the whole json document',
+                    action='store_true')
+parser.add_argument('-B',
+                    '--regenerate',
+                    help='Regenerate results even if the filename has not changed.',
                     action='store_true')
 args = parser.parse_args()
 source = args.filename
@@ -57,21 +62,33 @@ def mk_toc(texts_array):
     return toc
 
 def main():
-    # intermediate representation produced by Docling:
-    docling_result = converter.convert(source)
+    # check the cache first
+    cache = shelve.open('.toc_cache')
+    if source in cache and not args.regenerate:
+        document_toc = cache[source]
+        print("Using cached results. Invoke with -B to force regeneration")
+        cache.close()
+    else:
+        # intermediate representation produced by Docling:
+        docling_result = converter.convert(source)
 
-    # json output from intermediate representation:
-    json_representation = docling_result.document.export_to_dict()
+        # json output from intermediate representation:
+        json_representation = docling_result.document.export_to_dict()
 
-    if args.full_structure:
-        print(json.dumps(json_representation, ensure_ascii=False))
-        sys.exit()
+        if args.full_structure:
+            print(json.dumps(json_representation, ensure_ascii=False))
+            sys.exit()
 
-    # the texts array:
-    document_texts = json_representation['texts']
+        # the texts array:
+        document_texts = json_representation['texts']
 
-    # the toc derived from the texts array:
-    document_toc = mk_toc(document_texts)
+        # the toc derived from the texts array:
+        document_toc = mk_toc(document_texts)
+
+        # cache the results
+        cache = shelve.open('.toc_cache')
+        cache[source] = document_toc
+        cache.close()
 
     # And now print it to stdout
     print(json.dumps(document_toc, ensure_ascii=False))
