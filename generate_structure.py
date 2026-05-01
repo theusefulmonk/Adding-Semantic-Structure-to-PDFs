@@ -66,7 +66,7 @@ def main():
     cache = shelve.open('.toc_cache')
     if source in cache and not args.regenerate:
         document_toc = cache[source]
-        print("Using cached results. Invoke with -B to force regeneration")
+        # print("Using cached results. Invoke with -B to force regeneration")
         cache.close()
     else:
         # intermediate representation produced by Docling:
