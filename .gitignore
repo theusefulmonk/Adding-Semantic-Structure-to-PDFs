@@ -6,6 +6,7 @@
 .DS_Store
 *.pygtex
 *.pygstyle
+*scratch*
 /build/*
 !Vocabulary-Discovery-in-Late-Antique-Texts.pdf
 !examples-handout.pdf
