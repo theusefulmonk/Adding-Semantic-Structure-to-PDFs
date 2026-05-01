@@ -13,17 +13,11 @@ fi
 # Get the json from stdin:
 # read json_input 
 
-#pdf_input=$1
-#pdf_input="/dev/fd/0"
-# Temporarily hard code it in
-pdf_input="./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf"
-# This also doesn't work because pdfcpu checks the input for the json
-# extension. Its cli is not flexible enough to meet our needs, so we need to
-# work around it.
-#json_input="/dev/fd/0"
+pdf_input=$1
+# pdf_input="./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf"
 
-# Workaround
-cat /dev/fd/0 > .tmp.json
+# Workaround because pdfcpu does not yet accept stdin
+cat /dev/fd/0 > .tmp.json #should usually work in Linux and MacOS
 json_input=".tmp.json"
 
 pdfcpu bookmarks import $pdf_input $json_input output.pdf 
