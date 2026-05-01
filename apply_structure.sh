@@ -9,11 +9,27 @@ fi
 # Turns out that's a hard problem to solve, so I'm not going to try
 # for now.
 
-# Turns out that passing unicode strings via a unix pipe is fraught.
+# pdfcpu requires the json as a file argument, so the following does not currently work.
+# Get the json from stdin:
+# read json_input 
 
-# Get the json from stdin
-#read json_input 
+#pdf_input=$1
+#pdf_input="/dev/fd/0"
+# Temporarily hard code it in
+pdf_input="./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf"
+# This also doesn't work because pdfcpu checks the input for the json
+# extension. Its cli is not flexible enough to meet our needs, so we need to
+# work around it.
+#json_input="/dev/fd/0"
 
-pdf_input=$1
+# Workaround
+cat /dev/fd/0 > .tmp.json
+json_input=".tmp.json"
 
-pdfcpu bookmarks import $pdf_input tmp.json output.pdf && rm tmp.json
+pdfcpu bookmarks import $pdf_input $json_input output.pdf 
+
+# Cleanup
+# if [ -e ./.tmp.json ] 
+# then
+#     rm ./.tmp.json
+# fi
