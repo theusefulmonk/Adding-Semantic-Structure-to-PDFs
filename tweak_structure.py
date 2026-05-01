@@ -44,6 +44,51 @@ def keep_node(n):
     if n not in nodes_to_delete:
         return True
 
+# borrowed from here: 
+# https://gist.github.com/fralau/061a4f6c13251367ef1d9a9a99fb3e8d
+def parse_var(s):
+    """
+    Parse a key, value pair, separated by '='
+    That's the reverse of ShellArgs.
+
+    On the command line (argparse) a declaration will typically look like:
+        foo=hello
+    or
+        foo="hello world"
+    """
+    items = s.split('=')
+    key = items[0].strip() # we remove blanks around keys, as is logical
+    if len(items) > 1:
+        # rejoin the rest:
+        value = '='.join(items[1:])
+    return (key, value)
+
+
+def parse_vars(items):
+    """
+    Parse a series of key-value pairs and return a dictionary
+    """
+    d = {}
+
+    if items:
+        for item in items:
+            key, value = parse_var(item)
+            d[key] = value
+    return d
+
+def update_nodes(dictionary_of_nodes, bookmarks):
+    """
+    Update nodes based on dictionary of nodes to update and a list of bookmark
+    nodes. Return a new bookmark list.
+    """
+    OFFSET = -1
+    for k,v in dictionary_of_nodes.items():
+        node_contents = v.split(",") # result is a list
+        node_type = node_contents[0]
+        node_value = node_contents[1]
+        #wrapped = f'{{"{node_value}"}}'
+        bookmarks[int(k) + OFFSET][node_type] = node_value
+    return bookmarks
 
 parser = argparse.ArgumentParser()
 parser.add_argument('filename',
@@ -60,7 +105,7 @@ parser.add_argument('-d',
                     )
 parser.add_argument('-u',
                     '--update',
-                    type=int,
+                    metavar="KEY=VALUE",
                     nargs='+',
                     help='update nodes selected by numerical index'
                     )
@@ -102,8 +147,10 @@ if args.delete:
 else:
     pass
 if args.update:
+    print("args.update is " + str(args.update))
     should_print = False
-    nodes_to_update = [lambda x: x - 1 for x in args.update]
+    nodes_to_update = parse_vars(args.update)
+    print(nodes_to_update)
 else:
     pass
 
@@ -144,6 +191,10 @@ if args.delete:
 
 # Update nodes
 # TODO: implement update logic
+# desired syntax: -u foo=hello bar="hello world" baz=5
+# probably 1=k,v
+if args.update:
+   bookmarks = update_nodes(nodes_to_update, bookmarks)
 
 # Indent nodes
 # TODO: implement indentation logic
