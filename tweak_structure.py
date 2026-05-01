@@ -113,6 +113,10 @@ parser.add_argument('-n',
                     '--noprint',
                     help='Supress default printing of an enumerated list of nodes; useful in a pipeline',
                     action='store_true')
+parser.add_argument('-f',
+                    '--final',
+                    help='Output final version formatted for pdf cpu. Call last in the pipeline.',
+                    action='store_true')
 args = parser.parse_args()
 
 # Check inputs
@@ -142,13 +146,11 @@ if args.noprint:
 if args.delete:
     should_print = False
     nodes_to_delete = [(lambda x: x - 1)(x) for x in args.delete]
-else:
-    pass
 if args.update:
     should_print = False
     nodes_to_update = parse_vars(args.update)
-else:
-    pass
+if args.final:
+    should_print = False
 
 
 # Program state
@@ -160,7 +162,11 @@ else:
 #    json_representation = program_input
 #    print("No filename given. Loaded from cache")
 json_representation = json.loads(program_input)
-bookmarks = json_representation['bookmarks']
+if 'bookmarks' in json_representation:
+    bookmarks = json_representation['bookmarks']
+else: # We already have a bookmark list
+    bookmarks = json_representation
+
 
 ## Apply transformations ##
 
@@ -195,10 +201,14 @@ if args.delete:
 
 # Prepare for pdfcpu
 # expects a toplevel "bookmarks" key.
-# UPDATE: consider moving this logic into the apply script
 bookmarks_tree = {"bookmarks": bookmarks}
 
 # Finally, output new node structure to sdout
-print(json.dumps(bookmarks_tree, ensure_ascii=False))
+# optionally prepare it for pdfcpu
+if args.final:
+    print(json.dumps(bookmarks_tree, ensure_ascii=False))
+else:
+    print(json.dumps(bookmarks, ensure_ascii=False))
+
 
 
