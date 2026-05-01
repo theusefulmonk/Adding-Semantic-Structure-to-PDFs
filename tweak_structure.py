@@ -142,15 +142,11 @@ if args.noprint:
 if args.delete:
     should_print = False
     nodes_to_delete = [(lambda x: x - 1)(x) for x in args.delete]
-    print("INFO: Indices of nodes to delete are: " + str(list(nodes_to_delete)))
-    #print(str(list(nodes_to_delete)))
 else:
     pass
 if args.update:
-    print("args.update is " + str(args.update))
     should_print = False
     nodes_to_update = parse_vars(args.update)
-    print(nodes_to_update)
 else:
     pass
 
@@ -190,9 +186,7 @@ if args.delete:
 # probably needs to be handled in the argument parsing logic.
 
 # Update nodes
-# TODO: implement update logic
-# desired syntax: -u foo=hello bar="hello world" baz=5
-# probably 1=k,v
+# syntax: 1=k,v (that is, node 1 should be set to this key,value pair)
 if args.update:
    bookmarks = update_nodes(nodes_to_update, bookmarks)
 
