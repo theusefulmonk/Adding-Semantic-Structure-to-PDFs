@@ -72,7 +72,7 @@ args = parser.parse_args()
 
 # Check inputs
 if stdin_is_piped():
-    print("INFO: The tweak script is reading from stdin.")
+    #print("INFO: The tweak script is reading from stdin.")
     program_input = sys.stdin.read()
     #print(program_input)
     #with standard_input:
