@@ -83,7 +83,7 @@ def update_nodes(dictionary_of_nodes, bookmarks):
     """
     OFFSET = -1
     for k,v in dictionary_of_nodes.items():
-        node_contents = v.split(",") # result is a list
+        node_contents = v.split(",", 1) # result is a list
         node_type = node_contents[0]
         node_value = node_contents[1]
         #wrapped = f'{{"{node_value}"}}'
