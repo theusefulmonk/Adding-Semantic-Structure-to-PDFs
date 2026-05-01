@@ -177,6 +177,12 @@ if should_print:
     # there is no need to output further in the pipeline.
     sys.exit()
 
+
+# Update nodes
+# syntax: 1=k,v (that is, node 1 should be set to this key,value pair)
+if args.update:
+   bookmarks = update_nodes(nodes_to_update, bookmarks)
+
 # Delete nodes
 if args.delete:
     # Invalid and repeated nodes are automatically ignored
@@ -184,17 +190,12 @@ if args.delete:
 
 # TODO: implement a convenient range syntax: e.g., 1-5
 # probably needs to be handled in the argument parsing logic.
-
-# Update nodes
-# syntax: 1=k,v (that is, node 1 should be set to this key,value pair)
-if args.update:
-   bookmarks = update_nodes(nodes_to_update, bookmarks)
-
 # Indent nodes
 # TODO: implement indentation logic
 
 # Prepare for pdfcpu
 # expects a toplevel "bookmarks" key.
+# UPDATE: consider moving this logic into the apply script
 bookmarks_tree = {"bookmarks": bookmarks}
 
 # Finally, output new node structure to sdout
