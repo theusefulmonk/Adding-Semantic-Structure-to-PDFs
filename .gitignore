@@ -8,6 +8,7 @@ unfinished.json
 *.pygtex
 *.pygstyle
 *scratch*
+/.venv/*
 /build/*
 !Vocabulary-Discovery-in-Late-Antique-Texts.pdf
 !examples-handout.pdf
