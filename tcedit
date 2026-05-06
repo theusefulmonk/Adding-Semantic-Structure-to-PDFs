@@ -171,16 +171,21 @@ else: # We already have a bookmark list
 ## Apply transformations ##
 
 # Print first, unless supressed
-if should_print:
-    print((
-        'When invoked without options, this program prints a visual representation of the bookmark tree and then exits without applying any transformation. '
-        'When you are ready to transform the bookmark tree, specify the -d(elete) or -u(pdate) flags, followed by the index numbers of nodes you wish to modify. ' 
-        'Doing this will suppress printing the visual representation and will instead print the raw output tree to standard output for use by another program. '
-        '\n'
-        ))
+if should_print: 
+    print(''' 
+
+            When invoked without options, 'tcedit' prints a visual
+            representation of the bookmark tree and then exits without applying
+            any transformation.  When you are ready to transform the bookmark
+            tree, specify the -d(elete) or -u(pdate) flags, followed by their
+            arguments. Doing this will suppress printing the visual
+            representation and will instead print the raw output tree to
+            standard output for use by another program.
+
+            ''')
     legibly_print(bookmarks)
-    # If we are simply legibly printing to see what we want to modify
-    # there is no need to output further in the pipeline.
+    # If we are simply legibly printing to see what we want to modify there is
+    # no need to output further in the pipeline.
     sys.exit()
 
 
