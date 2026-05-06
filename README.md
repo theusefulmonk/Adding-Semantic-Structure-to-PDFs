@@ -16,13 +16,32 @@ To understand the purpose and use-case of the talk, please consult the paper ava
 
 ## Structure of the Repository
 
+```
+.
+├── Adding-Semantic-Structure-to-PDFs.md
+├── Adding-Semantic-Structure-to-PDFs.tex
+├── build
+│   ├── Adding-Semantic-Structure-to-PDFs.pdf
+├── corpus
+├── LICENSE.md
+├── Makefile
+├── README.md
+├── requirements.txt
+├── sources
+├── structure.bib
+├── tcApply.sh
+├── tcedit
+├── tcgen
+└── unfinished.json
+```
+
 Code examples are in the files examples.md and examples-handout.pdf.
 
-The corpus directory is intended as a convenient place in which to put repaginated pdfs that are ready for searching. I recommend that when you test this workflow, you cd into the corpus directory and then invoke your searches from there.
-
-The build directory holds the results of the build recipes in the Makefile. These are used to generate the final version of the paper and the examples. End users testing the workflow will not ordinarily need to invoke them, but those who wish to learn about Makefiles may find it useful to take a peek.
+The corpus directory is intended as a convenient place in which to put newly structured pdfs.
 
 The sources directory is a convenient place to put the pdf files to which you will add a document outline.
+
+The build directory holds the results of the build recipes in the Makefile. These are used to generate the final version of the paper and the examples. End users testing the workflow will not ordinarily need to invoke them, but those who wish to learn about Makefiles may find it useful to take a peek.
 
 ## Dependencies
 
@@ -74,4 +93,4 @@ At the time this tutorial was given, Docling itself does not seem to be able rel
 
 You are encouraged to consult the bibliography for the paper, which is also available in this repository. If you are interested in making your pdfs more useful for research purposes, you may want to look at the author's previous paper on efficient vocabulary discovery in pdf documents.
 
-<!--Insert link.-->
+[Vocabulary-Discovery-in-Late-Antique-Texts](https://github.com/theusefulmonk/Vocabulary-Discovery-in-Late-Antique-Texts)
