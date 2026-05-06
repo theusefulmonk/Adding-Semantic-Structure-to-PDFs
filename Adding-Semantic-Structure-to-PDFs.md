@@ -2,27 +2,76 @@
 title: Adding Semantic Structure to Unstructured PDFs via the Unix Command Line
 author: Andrew J. Hayes
 date: May 16, 2026
+csl: '/Users/drew/.local/share/pandoc/csl/chicago-fullnote-bibliography-short-title-subsequent.csl'
+bibliography: 'structure.bib'
+shorttitle: Adding Structure
+suppress-bibliography: false
+papersize: letter
+listings: true
+documentclass: 'tufte-handout'
+classoptions: 
+	- 12pt
+colorlinks: true
+linkcolor: teal
+urlcolor: blue
+versequotations: true
+header-includes:
+- |
+    ```{=latex}
+    %\usepackage[svgnames]{xcolor}
+    %\definecolor{codebackground}{RGB}{240, 240, 235}
+    %\definecolor{codebackground}{RGB}{117, 128, 124}
+    %\AtBeginDocument{\colorlet{defaultcolor}{.}}
+    %\definecolor{bg}{HTML}{282828} % from https://github.com/kevinsawicki/monokai
+    %\usepackage[outputdir=build]{minted}
+    %\setminted{style=monokai,bgcolor=bg}
+    %\setmintedinline{style=monokai,bgcolor=None}
+    %\definecolor{Text}{HTML}{F8F8F2}
+    %\AddToHook{cmd/mintinline/before}{\color{Text}}
+    %\AddToHook{cmd/mintinline/after}{}
+		%\AtBeginEnvironment{minted}{\color{Text}}
+    \usepackage{pgfornament}
+    \usepackage{setspace}
+    \usepackage{microtype}
+    \usepackage{fontspec}
+		\defaultfontfeatures{Numbers=OldStyle}
+		\setmainfont{STIX Two Text}
+    \setmonofont{PragmataPro Mono Liga}
+    %\renewcommand{\footnote}[1]{\sidenote{#1}}
+    %\renewcommand{\familydefault}{\sfdefault}
+    \fancyfoot[LEO]{\footnotesize © 2025 Andrew Hayes.This work (apart from any source code it contains) is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.}
+    ```
 ---
+
+<!--needed fix for tufte-handout-->
+<!--see https://tex.stackexchange.com/questions/560523/tufte-compile-error-with-latex-->
+\ifdefined\soulregister
+\soulregister\MakeTextUppercase{1}
+\soulregister\MakeTextLowercase{1}
+\soulregister\newlinetospace{1}
+\fi
+
+\doublespacing
 
 # Introduction and Use Case
 
-This paper demonstrates the concept and simple implementation for a workflow that an individual scholar may use to enhance the utility of a private research corpus of ancient or medieval sources in pdf format by adding a semantically structured document outline to them. Traditional papers and books are usually divided into sections, each with a header, and (in the case of books) often furnished with some kind of table of contents to facilitate rapid navigation to a particular point of interest in that structure. The pdf standard, which intends to codify a digital representation of paper documents, has long supported a digital implementation of this feature: a navigable table of contents, usually in a sidebar. But, despite the fact that papers, books, and theses are now commonly accessed in pdf form, they often lack such an outline. This paper shows how to automate the process of adding one using Unix command line tools.
+This paper demonstrates the concept and simple implementation for a workflow that an individual scholar may use to enhance the utility of a private research corpus of ancient or medieval sources in pdf format by adding a semantically structured document outline to them. Traditional papers and books are usually divided into sections, each with a header, and (in the case of books) often furnished with some kind of table of contents to facilitate rapid navigation to a particular point of interest in that structure. The pdf standard, which intends to codify a digital representation of paper documents that would be portable across different operating systems,[@pdfassociation2020, viii (§0.1); @gamalielsson2013] has long supported a digital implementation of this feature: a navigable table of contents, usually in a sidebar. But, despite the fact that papers, books, and theses are now commonly accessed in pdf form, they often lack such an outline. This paper shows how to automate the process of adding one using Unix command line tools.
 
 This workflow will only be useful if the document in question is composed of searchable digital text, either because it was born digital, or because optical character recognition (OCR) has  subsequently added a text layer to each page. It is not suited for for very short texts or texts that inherently lack a discernible structure or possess it only minimally, such as scans of medieval manuscripts. The most usual application will be to critical editions of primary sources or to the translation volumes that accompany them. A logical secondary application would be to longer articles with many sections.
 
-This presentation aims to show what is possible using open source Python tooling and to provide a simple implementation of command line scripts that the reader may use and adapt for his or her own specific needs. Along the same lines, the paper includes a few observations about what was needed to implement the scripts in Python and POSIX shell, with the hope that this will help others learn enough to adapt the scripts to their purposes and avoid pitfalls. This paper and the accompanying source code will be released under an open source license. Code may be updated in the future to account for changes in the Python ecosystem, or the Docling library on which the code depends. The workflow demonstrated here is compatible with the one demonstrated in the author's paper: "Efficient Vocabulary Discovery in Late Antique Texts" given at the 2025 Annual Meeting of the North American Patristics Society, and [publicly available here](https://github.com/theusefulmonk/Vocabulary-Discovery-in-Late-Antique-Texts).
+This presentation aims to show what is possible using open source Python tooling and to provide a simple implementation of command line scripts that the reader may use and adapt for his or her own specific needs. Along the same lines, the paper includes a few observations about what was needed to implement the scripts in Python and POSIX shell, with the hope that this will help others learn enough to adapt the scripts to their purposes and avoid pitfalls. This paper and the accompanying source code will be released under an open source license. Code may be updated in the future to account for changes in the Python ecosystem, or the Docling library on which the code depends. The workflow demonstrated here is compatible with the one demonstrated in the author's paper: "Efficient Vocabulary Discovery in Late Antique Texts" given at the 2025 Annual Meeting of the North American Patristics Society, and [publicly available here](https://github.com/theusefulmonk/Vocabulary-Discovery-in-Late-Antique-Texts).^[**Note on AI Use:** Generative AI was not used to research the ideas and techniques contained in, nor produce the text of, this paper or its associated source code.]
 
 # Brief Conceptual Background to the Tooling
 
-Python is a general purpose interpreted programming language widely used in scientific research and in academia more generally. It enjoys a rich standard library, and can be used (among many other applications) to write composable command line scripts, following the Unix software tools approach. According to this approach tools should ideally peform a single task well, but be designed to receive and pass along input and output in a standard way, to enable composition. One achieves such composition by interleaving calls to specific commands or scripts with the pipe character (`|`). The output of one program becomes the input of the next in the pipeline until the final desired result is output. The workflow demonstrated in this paper uses the Python standard library in conjunction with Docling to script a pipeline that takes a pdf lacking a digital Document outline, creates such an outline by parsing the document's section headers, adjusts it, and applies it to a new copy of the pdf.
+Python is a general purpose interpreted programming language widely used in scientific research and in academia more generally. It enjoys a rich standard library, and can be used (among many other applications) to write composable command line scripts, following the Unix software tools approach.[@kernighan1976, pp. 1-6.] According to this approach tools should ideally perform a single task well, but be designed to receive and pass along input and output in a standard way, to enable composition. One achieves such composition by interleaving calls to specific commands or scripts with the pipe character (`|`). The output of one program becomes the input of the next in the pipeline until the final desired result is output.[@blum2015, pp. 279-284.] The workflow demonstrated in this paper uses the Python standard library in conjunction with Docling to script a pipeline that takes a pdf lacking a digital Document outline, creates such an outline by parsing the document's section headers, adjusts it, and applies it to a new copy of the pdf.
 
-Docling is relatively recent open source python library and command line tool, developed by IBM for parsing pdfs and other human-readable documents[@docling] so that their data can be more easily ingested by another application, such as a large language model and thus augment it with domain-specific knowledge. This typical use-case is known as RAG (Retrieval Augmented Generation).[@redhat2026] This is a broad domain, and the Docling library is powerful and feature-rich. Nevertheless, this workflow uses only a small subset of its abilities for a comparatively simple task: extracting the names and locations of section headings in a structured form that can be manipulated programmatically.
+Docling is relatively recent open source python library and command line tool, developed by IBM for parsing pdfs and other human-readable documents[@docling2026] so that their data can be more easily ingested by another application, such as a large language model and thus augment it with domain-specific knowledge. This typical use-case is known as RAG (Retrieval Augmented Generation).[@redhat2026] This is a broad domain, and the Docling library is powerful and feature-rich. Nevertheless, this workflow uses only a small subset of its abilities for a comparatively simple task: extracting the names and locations of section headings in a structured form that can be manipulated programmatically.
 
-Pdfcpu is an open source library and command line tool written in Go which is able to perform a broad range of pdf manipulations. In this workflow it is used to apply the tree structure of the document outline to the pdf, as the final stage in the workflow.
+Pdfcpu is an open source library and command line tool written in Go which is able to perform a broad range of pdf manipulations.[@pdfcpu] In this workflow it is used to apply the tree structure of the document outline to the pdf, as the final stage in the workflow.
 
 It is important to note that the terminology for the pdf document outline varies. The current PDF ISO standard describes it this way: 
 
-> The outline consists of a tree-structured hierarchy of outline items (sometimes called bookmarks), which serve as a visual table of contents to display the document’s structure to the user.^[ISO 32000-2:2020(E), §12.3.3.] 
+> The outline consists of a tree-structured hierarchy of outline items (sometimes called bookmarks), which serve as a visual table of contents to display the document’s structure to the user.[@pdfassociation2020, §12.3.3.] 
 
 The wording of the standard suggests that the canonical name for the items in the hierarchy is "outline items." Adobe Acrobat's user interface at the time of writing refers to the items in the structure as bookmarks. Pdfcpu's documentation also employs this terminology. Note that bookmarks need not form part of a tree. They can take the form of navigation targets in a flat list. In this paper such bookmarks or document outlines and their outline items will also be referred to generically as tables of contents.
 
@@ -36,11 +85,11 @@ The workflow consists of three phases: generating, updating, and applying the ta
 
 ## Phase One: Generate the Table of Contents
 
-In order to add a table of contents to a pdf, one first has to derive the information from the file and represent it in a structured way. To do this, we use Docling's ability to process a pdf and export a stream of JSON (which can also, if desired, be saved to a file). This JSON contains docling's understanding of the whole document, but for our purposes we need to extract only the information about section headings from the JSON Docling produces.
+In order to add a table of contents to a pdf, one first has to derive the information from the file and represent it in a structured way. To do this, we use Docling's ability to process a pdf and export a stream of JSON[@json; @ecma2017] (which can also, if desired, be saved to a file). This JSON contains Docling's "understanding" of the whole document, but to create a document outline we need to extract only the information about section headings from the JSON Docling produces.
 
 At least two additional practical considerations are relevant. First, calls to Docling are time consuming and computationally expensive. For this reason, the script caches the result of a previous run. A full re-parse of the document can be forced by invoking the `tcgen` script with the `-B` flag. Second, since medievalists and humanists more generally often have to work with texts in languages such as Latin or Greek, it is important  to output the json text in utf-8 encoding. In the script, this is done by ensuring that calls to Python's `json.dumps` (dump string) function are passed the `ensure_ascii=False` parameter. Users of the script must, of course, have a unicode-capable terminal emulator and the appropriate fonts installed.
 
-In our example, we will use a born-digital pdf critical edition of the letters of the *Corpus Dionysiacum*. Despite being purchased as a natively digital pdf, it lacks any document outline. It contains the usual sorts of headers that a printed critical edition might contain: an introductory section for *sigla* used in the edition, followed by the critical text of each letter, whose titles, like the letters themselves, are printed in Greek. To generate a table of contents, we simply invoke the script with the filename as an argument:
+In our example, we will use a born-digital pdf critical edition of the letters of the *Corpus Dionysiacum*.[@dionysius1991] Note that, due to copyright, it cannot be distributed in the repository along with this paper. Readers are encouraged to supply their own pdf file(s) for experimentation. Despite being purchased as a natively digital pdf, it lacks any document outline. It contains the usual sorts of headers that a printed critical edition might contain: an introductory section for *sigla* used in the edition, followed by the critical text of each letter, whose titles, like the letters themselves, are printed in Greek. To generate a table of contents, we simply invoke the script with the filename as an argument:
 
 ```
 ./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
@@ -106,17 +155,17 @@ cat unfinished.json | ./tcedit -u 13="title,ι 'ΊΩΑΝΝΗΙ  ΘΕΟΛΟΓΩΙ
 
 Here, the contents of the unfinished.json file are piped back into the `tcedit` script to complete one more update. The last node in the bookmark list does not begin with a lowercase Greek letter. All the other section headers begin with their appropriate Greek letter in sequence. But with this final transformation accomplished, the last section header matches the format of all the rest.
 
-Docling's ability to output pdf structure as json is a significant advantage because json is so widely used and widely supported. In fact, for more advanced transformation, it is possible to dispense with the `tcedit` script and use `jq`, a robust command line tool for filtering json. Just like any other Unix filter, it can be added to the pipeline to achieve whatever transformation is desired. `jq` is out of scope for this tutorial, but it shows what is possible with composable command line tools.
+Docling's ability to output pdf structure as json is a significant advantage because json is so widely used and widely supported. In fact, for more advanced transformation, it is possible to dispense with the `tcedit` script and use `jq`, a robust command line tool for filtering json.[@jq] Just like any other Unix filter, it can be added to the pipeline to achieve whatever transformation is desired. `jq` is out of scope for this tutorial, but it shows what is possible with composable command line tools.
 
 A digital humanist could easily modify and extend these scripts. One could, for example, create a version of these tools that would output just the text of each heading with or without page numbers. This could be redirected to another file and turned into the skeleton of a handout for a talk. This output could in turn be modified or piped into pandoc to produce the final handout. Docling is not limited to ingesting pdfs. It can also ingest \LaTeX{} files and MS Word files. 
 
 # Limitations and Summary
 
-The workflow offered here makes the most sense as a tool for an individual scholar or a small team with limited budget. Alternatives exist. One could use a variety of commercially available GUI software tools to edit the document outline of an existing pdf. The most obvious one is Adobe Acrobat, distributed by the company that developed the PDF standard originally. PDFExpert is a powerful (albeit Mac only) alternative. Other commercially available software, including web-based tools may have similar or even more advanced capabilities. But of course, they cost money and cannot be freely adapted like open source software can. They are more complex to automate or cannot be automated at all, making them less efficient for performing batched tasks. 
+The workflow offered here makes the most sense as a tool for an individual scholar or a small team with limited budget. Alternatives exist. One could use a variety of commercially available GUI software tools to edit the document outline of an existing pdf. The most obvious one is Adobe Acrobat, distributed by the company that developed the PDF standard originally. PDFExpert is a powerful (albeit Mac only) alternative. Xodo distributes a free pdf reader that can edit document outlines. Other commercially available software, including web-based tools may have similar or even more advanced capabilities. But of course, commercial solutions cost money and cannot be freely adapted like open source software can. Perhaps more importantly for efficient processing of large personal libraries, they are more complex to automate or cannot be automated at all. The primary advantage that command line tools provide is that Docling can generate a reasonable approximation whose results can be processed in a batch or in an automated fashion. Creating a document outline for a large critical edition by hand would be laborious and error prone. 
 
-The scripts offered in this tutorial are proof-of-concept. They have immediate utility, but also a few key limitations that one might want to improve upon in a version adapted for personal use. Most notably, `tcedit` lacks the ability to perform more complex transformations beyond simple node deletion and editing. It cannot nest them as sub-headings. This limitation is also reflected in Docling, which does not seem to be able to reliably interpret the section header hierarchy. In the interest of speed, the `tcgen` script does not perform OCR directly, though this is a capability that Docling offers, and it could be added.
+The scripts offered in this tutorial are proof-of-concept. They have immediate utility, but also a few key limitations that one might want to improve upon in a version adapted for personal use. Most notably, `tcedit` lacks the ability to perform more complex transformations beyond simple node deletion and editing. It cannot nest them as sub-headings. This limitation is also reflected in Docling, which does not seem to be able to reliably interpret the section header hierarchy. In the interest of speed, the `tcgen` script does not perform OCR directly, though this is a capability that Docling offers, and it could be added by adapting the `tcgen` script and installing OCR dependencies on the local system.
 
-Docling allows the creation of powerful command line tools in Python for extracting the information needed for a pdf document outline. Pdfcpu makes it easy to apply this document outline to a file. The result is a more useful digital text. The Unix Software Tools philosophy enables this utility by creating an environment in which commands can be iteratively composed, experimented with, and automated. And such tools are available for free with few restrictions on their use.
+Docling allows the creation of powerful command line tools in Python for extracting the information needed for a pdf document outline. Pdfcpu makes it easy to apply this document outline to a file. The result is a more useful digital text. The Unix Software Tools philosophy makes this utility possible by creating an environment in which commands can be iteratively composed, experimented with, and automated. And such tools are available for free with few restrictions on their use.
 
 \clearpage
 
