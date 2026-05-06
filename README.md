@@ -46,8 +46,8 @@ The build directory holds the results of the build recipes in the Makefile. Thes
 ## Dependencies
 
 - python 3.11
-- docling 2.65
-- pdfcpu 0.11.1
+- [docling 2.65](https://docling-project.github.io/docling/)
+- [pdfcpu 0.11.1](https://pdfcpu.io)
 
 ## Recommendations for Using the Code
 
@@ -63,8 +63,8 @@ python --version
 It is likely that the code in this repository will work with later python versions, but it has been tested only with 3.11.
 
 ```
-git clone blah
-cd blah
+git clone https://github.com/theusefulmonk/Adding-Semantic-Structure-to-PDFs.git
+cd Adding-Semantic-Structure-to-PDFs
 python -m venv .venv 
 ```
 
