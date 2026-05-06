@@ -39,7 +39,7 @@ header-includes:
     \setmonofont{PragmataPro Mono Liga}
     %\renewcommand{\footnote}[1]{\sidenote{#1}}
     %\renewcommand{\familydefault}{\sfdefault}
-    \fancyfoot[LEO]{\footnotesize © 2025 Andrew Hayes.This work (apart from any source code it contains) is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.}
+    \fancyfoot[LEO]{\footnotesize © 2026 Andrew Hayes.This work (apart from any source code it contains) is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.}
     ```
 ---
 
@@ -91,7 +91,7 @@ At least two additional practical considerations are relevant. First, calls to D
 
 In our example, we will use a born-digital pdf critical edition of the letters of the *Corpus Dionysiacum*.[@dionysius1991] Note that, due to copyright, it cannot be distributed in the repository along with this paper. Readers are encouraged to supply their own pdf file(s) for experimentation. Despite being purchased as a natively digital pdf, it lacks any document outline. It contains the usual sorts of headers that a printed critical edition might contain: an introductory section for *sigla* used in the edition, followed by the critical text of each letter, whose titles, like the letters themselves, are printed in Greek. To generate a table of contents, we simply invoke the script with the filename as an argument:
 
-```
+```bash
 ./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
 ```
 
@@ -105,7 +105,7 @@ The output of `tcgen` is imperfect. It contains some (semantically) duplicate no
 
 The script `tcedit` receives the json stream from the previous command (here `tcgen`). When given no options, it outputs an enumerated list of bookmark nodes so that the user can inspect them and decide what changes might be necessary. This intermediate representation is intended for the user and not for passing on to another command in the pipeline. In this case, if we invoke it with the same filename as before:
 
-```
+```bash
 ./tcedit ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
 ```
 
@@ -113,16 +113,21 @@ we will see the enumerated list of bookmark nodes. This reveals the duplicated n
 
 It can be invoked with the `-d` (or in long form `--delete`) flag, along with the index numbers of the nodes to delete. For example, to delete the seventh and the thirteenth bookmark, one could invoke it as follows:
 
-```
-./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -d 7 13
+```bash
+./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
+./tcedit -d 7 13
 ```
 
 It will output the json string to standard output with the requested nodes deleted.
 
 Using the `-u` (long form `--update`) flag, it is possible to make changes to the text of a given node using a KEY=VALUE syntax in which the VALUE is itself a tuple consisting of the portion of the node that needs editing. For example:
 
-```
-./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13
+```bash
+./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
+./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
+-d 7 13
 ```
 
 This pipeline updates the title portions of nodes 6, 8, and 14. Both the `-u` and `-d` flags may be used together with the same command. The order in which they are given does not matter. `tcedit` will always perform update operations before the delete operations in a single invocation. Once we are satisfied that the edits are correct, the `-f` (long form `--final`) flag can be added to output it in the form needed for Pdfcpu to apply it to the finished pdf.
@@ -131,8 +136,13 @@ This pipeline updates the title portions of nodes 6, 8, and 14. Both the `-u` an
 
 The final stage of the workflow is to apply the output of the `tcedit` script to a copy of the original pdf file and output it. A simple shell script, `tcApply.sh` has been provided for this purpose: 
 
-```
-./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13 -f | ./tcApply.sh sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
+```bash
+./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
+./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
+-d 7 13 -f | \
+./tcApply.sh sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
 ```
 
 Note the use of the `-f` flag to finish outputting the result of  `tcedit`, which is then piped into the `tcApply.sh` script, which produces a file called simply `output.pdf`. This file contains the navigable table of contents. It is now ready to use. Ordinarily, one would then meaningfully rename the file and store it in a personal digital library of texts.
@@ -143,17 +153,22 @@ On the Unix command line, it is often useful to compose a pipeline with repeated
 
 It may also happen that one needs to stop work in the midst of an exploratory session in which one has not completed all desired transformations. In this case, you can redirect the bookmarks object to a file (equivalent to issuing a "Save" command via a GUI). It is possible to reload this file later to resume the transformation process. Here is what that would look like:
 
-```
-./generate_structure.py sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tweak_structure.py -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13 > unfinished.json
+```bash
+./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf |\
+./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
+-d 7 13 > unfinished.json
 ```
 
 This would save the bookmark list to the file `unfinished.json`. It could easily be picked up again using the standard Unix tool `cat`:
 
-```
-cat unfinished.json | ./tcedit -u 13="title,ι 'ΊΩΑΝΝΗΙ  ΘΕΟΛΟΓΩΙ,  ΆΠΟΣΤΟΛΩΙ  ΚΑΙ  ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ  ΚΑΤΑ ΠΑΤΜΟΝ  ΤΗΝ  ΝΗΣΟΝ" | ./tcedit
+```bash
+cat unfinished.json | ./tcedit -u \
+13="title,ι 'ΊΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ" | ./tcedit
 ```
 
-Here, the contents of the unfinished.json file are piped back into the `tcedit` script to complete one more update. The last node in the bookmark list does not begin with a lowercase Greek letter. All the other section headers begin with their appropriate Greek letter in sequence. But with this final transformation accomplished, the last section header matches the format of all the rest.
+Here, the contents of the `unfinished.json` file are piped back into the `tcedit` script to complete one more update. The last node in the bookmark list does not begin with a lowercase Greek letter. All the other section headers begin with their appropriate Greek letter in sequence. But with this final transformation accomplished, the last section header matches the format of all the rest.
 
 Docling's ability to output pdf structure as json is a significant advantage because json is so widely used and widely supported. In fact, for more advanced transformation, it is possible to dispense with the `tcedit` script and use `jq`, a robust command line tool for filtering json.[@jq] Just like any other Unix filter, it can be added to the pipeline to achieve whatever transformation is desired. `jq` is out of scope for this tutorial, but it shows what is possible with composable command line tools.
 

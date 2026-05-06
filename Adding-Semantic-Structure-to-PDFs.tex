@@ -42,6 +42,46 @@
 \newcommand{\passthrough}[1]{#1}
 \lstset{defaultdialect=[5.3]Lua}
 \lstset{defaultdialect=[x86masm]Assembler}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{255,255,255}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.75,0.01,0.01}{\textbf{\colorbox[rgb]{0.97,0.90,0.90}{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.79,0.38,0.79}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.00,0.34,0.68}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.69,0.50,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.39,0.29,0.61}{\textbf{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.57,0.30,0.62}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.54,0.53,0.53}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.00,0.58,1.00}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.67,0.33,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.12,0.11,0.11}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.00,0.34,0.68}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.69,0.50,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.38,0.47,0.50}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.75,0.01,0.01}{\underline{#1}}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.58,1.00}{\textbf{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.69,0.50,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.39,0.29,0.61}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{1.00,0.33,0.00}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.69,0.50,0.00}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.12,0.11,0.11}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.12,0.11,0.11}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.12,0.11,0.11}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.43,0.16}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.00,0.43,0.16}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.34,0.68}{\colorbox[rgb]{0.88,0.91,0.97}{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.24,0.68,0.91}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{1.00,0.33,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.75,0.01,0.01}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.34,0.68}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.75,0.01,0.01}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.75,0.01,0.01}{#1}}
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -100,7 +140,7 @@
 \setmonofont{PragmataPro Mono Liga}
 %\renewcommand{\footnote}[1]{\sidenote{#1}}
 %\renewcommand{\familydefault}{\sfdefault}
-\fancyfoot[LEO]{\footnotesize © 2025 Andrew Hayes.This work (apart from any source code it contains) is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.}
+\fancyfoot[LEO]{\footnotesize © 2026 Andrew Hayes.This work (apart from any source code it contains) is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/.}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -300,9 +340,11 @@ letter, whose titles, like the letters themselves, are printed in Greek.
 To generate a table of contents, we simply invoke the script with the
 filename as an argument:
 
-\begin{verbatim}
-./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
+\end{Highlighting}
+\end{Shaded}
 
 This outputs a json string containing an array, each element of which is
 a json object containing a title key and a page key, indicating the
@@ -331,9 +373,11 @@ is intended for the user and not for passing on to another command in
 the pipeline. In this case, if we invoke it with the same filename as
 before:
 
-\begin{verbatim}
-./tcedit ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcedit}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
+\end{Highlighting}
+\end{Shaded}
 
 we will see the enumerated list of bookmark nodes. This reveals the
 duplicated nodes, as well as nodes that mistakenly treated Greek text
@@ -344,9 +388,12 @@ It can be invoked with the \texttt{-d} (or in long form
 delete. For example, to delete the seventh and the thirteenth bookmark,
 one could invoke it as follows:
 
-\begin{verbatim}
-./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -d 7 13
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}d}\NormalTok{ 7 13}
+\end{Highlighting}
+\end{Shaded}
 
 It will output the json string to standard output with the requested
 nodes deleted.
@@ -356,9 +403,15 @@ possible to make changes to the text of a given node using a KEY=VALUE
 syntax in which the VALUE is itself a tuple consisting of the portion of
 the node that needs editing. For example:
 
-\begin{verbatim}
-./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{{-}d 7 13}
+\end{Highlighting}
+\end{Shaded}
 
 This pipeline updates the title portions of nodes 6, 8, and 14. Both the
 \texttt{-u} and \texttt{-d} flags may be used together with the same
@@ -377,9 +430,16 @@ The final stage of the workflow is to apply the output of the
 A simple shell script, \texttt{tcApply.sh} has been provided for this
 purpose:
 
-\begin{verbatim}
-./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13 -f | ./tcApply.sh sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{{-}d 7 13 }\AttributeTok{{-}f} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcApply.sh}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
+\end{Highlighting}
+\end{Shaded}
 
 Note the use of the \texttt{-f} flag to finish outputting the result of
 \texttt{tcedit}, which is then piped into the \texttt{tcApply.sh}
@@ -409,23 +469,32 @@ a file (equivalent to issuing a ``Save'' command via a GUI). It is
 possible to reload this file later to resume the transformation process.
 Here is what that would look like:
 
-\begin{verbatim}
-./generate_structure.py sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tweak_structure.py -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" 8="title,δ ΤΩΙ ΑΥΤΩΙ" 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" -d 7 13 > unfinished.json
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|}\DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{{-}d 7 13 }\OperatorTok{\textgreater{}}\NormalTok{ unfinished.json}
+\end{Highlighting}
+\end{Shaded}
 
 This would save the bookmark list to the file \texttt{unfinished.json}.
 It could easily be picked up again using the standard Unix tool
 \texttt{cat}:
 
-\begin{verbatim}
-cat unfinished.json | ./tcedit -u 13="title,ι 'ΊΩΑΝΝΗΙ  ΘΕΟΛΟΓΩΙ,  ΆΠΟΣΤΟΛΩΙ  ΚΑΙ  ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ  ΚΑΤΑ ΠΑΤΜΟΝ  ΤΗΝ  ΝΗΣΟΝ" | ./tcedit
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{ unfinished.json }\KeywordTok{|} \ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
+\NormalTok{13=}\StringTok{"title,ι \textquotesingle{}ΊΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ"} \KeywordTok{|} \ExtensionTok{./tcedit}
+\end{Highlighting}
+\end{Shaded}
 
-Here, the contents of the unfinished.json file are piped back into the
-\texttt{tcedit} script to complete one more update. The last node in the
-bookmark list does not begin with a lowercase Greek letter. All the
-other section headers begin with their appropriate Greek letter in
-sequence. But with this final transformation accomplished, the last
+Here, the contents of the \texttt{unfinished.json} file are piped back
+into the \texttt{tcedit} script to complete one more update. The last
+node in the bookmark list does not begin with a lowercase Greek letter.
+All the other section headers begin with their appropriate Greek letter
+in sequence. But with this final transformation accomplished, the last
 section header matches the format of all the rest.
 
 Docling's ability to output pdf structure as json is a significant
