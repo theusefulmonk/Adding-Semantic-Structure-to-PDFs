@@ -45,22 +45,15 @@ The build directory holds the results of the build recipes in the Makefile. Thes
 
 ## Dependencies
 
-- python 3.11
-- [docling 2.65](https://docling-project.github.io/docling/)
-- [pdfcpu 0.11.1](https://pdfcpu.io)
+- python 3.11 or greater
+- [docling 2.65](https://docling-project.github.io/docling/) or greater
+- [pdfcpu 0.11.1](https://pdfcpu.io) or greater
 
 ## Recommendations for Using the Code
 
-This repository is a proof-of-concept. It does not offer a fully-fledged python package. A `requirements.txt` file is provided for users who, after cloning this repo, wish to install a python virtual environment easily to run the scripts it contains. Assuming python 3.11 is already installed on your system, and is available in your PATH, start by creating a python 3.11 virtual environment:
+This repository is a proof-of-concept. It does not offer a fully-fledged python package. The recommended approach to using this code is to clone the repository and then create a virtual environment into which you will install docling. You should be able to use any python version > 3.11.
 
-```
-# Confirm that your current python is 3.11:
-python --version
-# Should output something like:
-# Python 3.11.*
-```
-
-It is likely that the code in this repository will work with later python versions, but it has been tested only with 3.11.
+First, clone the repository and set up the virtual environment inside it.
 
 ```
 git clone https://github.com/theusefulmonk/Adding-Semantic-Structure-to-PDFs.git
@@ -74,16 +67,37 @@ Then, activate the new virtual environment:
 source ./.venv/bin/activate
 ```
 
-Finally, install the required dependencies:
+Your shell prompt will likely change to indicate that the virtual environment is active. You can check by issuing the command `which python` which should return the path to the python interpreter in the virtual environment directory (`.venv`, if you've been following this example). Finally, install the required dependencies:
 
 ```
-pip install -r requirements.txt
+pip install docling
 ```
 
 The final step of applying the table of contents to the pdf relies on `pdfcpu`.
 Install it using the appropriate instructions for your platform, as indicated here:
 
 https://pdfcpu.io/getting_started/install_cli/?src=docs
+
+One note of caution: depending on your distribution of Linux, `pdfcpu` may be out of date in your distribution's package manager. You need a version greater than 0.11.1. You may need to install it manually. You may find it more convenient to use [`homebrew`](https://brew.sh).
+
+A `requirements.txt` file has been made available in the repository. This will enable you to recreate the environment used in the tutorial exactly. But you need to ensure that you are running python 3.11 and using same platform and architecture (MacOS and Apple Silicon) as was used in the tutorial.  
+
+Assuming python 3.11 is already
+installed on your system, and is available in your PATH, start by creating a
+python 3.11 virtual environment:
+
+```
+# Confirm that your current python is 3.11:
+python --version
+# Should output something like:
+# Python 3.11.*
+```
+Then, clone the repository and set up a virtual environment as before. With the
+environment activated, you can then call
+
+```
+pip install -r requirements.txt
+```
 
 ## Current Limitations
 
