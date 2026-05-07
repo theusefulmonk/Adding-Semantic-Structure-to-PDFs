@@ -35,8 +35,6 @@ To understand the purpose and use-case of the talk, please consult the paper ava
 └── unfinished.json
 ```
 
-Code examples are in the files examples.md and examples-handout.pdf.
-
 The corpus directory is intended as a convenient place in which to put newly structured pdfs.
 
 The sources directory is a convenient place to put the pdf files to which you will add a document outline.
