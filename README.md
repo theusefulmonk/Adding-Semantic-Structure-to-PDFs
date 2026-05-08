@@ -4,7 +4,7 @@
 
 A workflow demonstration given at International Congress for Medieval Studies, May 16, 2026 in Kalamazoo, Michigan. This was an online session. 
 
-The tutorial itself is pitched at an intermediate level. It presumes some familiarity with working at the command line and with the python ecosystem, as well as some basic programming concepts. But if you are a beginner interested in seeing how python might help you do useful things for your work, you are most welcome. If you need a practical, beginner-friendly introduction to Python, I highly recommend Al Sweigart's [*Automate the Boring Stuff with Python*](https://automatetheboringstuff.com).
+The workflow itself is pitched at an intermediate level. It presumes some familiarity with working at the command line and with the python ecosystem, as well as some basic programming concepts. But if you are a beginner interested in seeing how python might help you do useful things for your work, you are most welcome. If you need a practical, beginner-friendly introduction to Python, I highly recommend Al Sweigart's [*Automate the Boring Stuff with Python*](https://automatetheboringstuff.com).
 
 (This repository has been made public in advance of the live event, so you may be viewing it before I've actually given the talk.)
 
@@ -51,7 +51,7 @@ The build directory holds the results of the build recipes in the Makefile. Thes
 
 ## Recommendations for Using the Code
 
-This repository is a proof-of-concept. It does not offer a fully-fledged python package. The recommended approach to using this code is to clone the repository and then create a virtual environment into which you will install docling. You should be able to use any python version > 3.11.
+This repository is a proof-of-concept. It does not offer a fully-fledged python package. The recommended approach to using this code is to clone the repository and then create a virtual environment into which you will install docling. You should be able to use any python version ≥ 3.11.
 
 First, clone the repository and set up the virtual environment inside it.
 
@@ -78,9 +78,9 @@ Install it using the appropriate instructions for your platform, as indicated he
 
 https://pdfcpu.io/getting_started/install_cli/?src=docs
 
-One note of caution: depending on your distribution of Linux, `pdfcpu` may be out of date in your distribution's package manager. You need a version greater than 0.11.1. You may need to install it manually. You may find it more convenient to use [`homebrew`](https://brew.sh).
+One note of caution: depending on your distribution of Linux, `pdfcpu` may be out of date in your distribution's package manager. You need a version ≥ 0.11.1. You may need to install it manually. But you may find it more convenient to use [`homebrew`](https://brew.sh).
 
-A `requirements.txt` file has been made available in the repository. This will enable you to recreate the environment used in the tutorial exactly. But you need to ensure that you are running python 3.11 and using same platform and architecture (MacOS and Apple Silicon) as was used in the tutorial.  
+If you want to try to recreate the environment used in this demonstration exactly, a `requirements.txt` file has been made available. But you need to ensure that you are running python 3.11 and using same platform and architecture (MacOS and Apple Silicon) as was used in the demonstration.  
 
 Assuming python 3.11 is already
 installed on your system, and is available in your PATH, start by creating a
@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 ## Current Limitations
 
-At the time this tutorial was given, Docling itself does not seem to be able reliably to produce a nested table of contents, given a book-like pdf input. This could be remedied by giving the provided script `tcedit` the ability to indent a given bookmark so as to produce a nested table of contents structure. Implementing this feature would make an excellent next step for anyone interested in hacking on the script for their own purposes. 
+At the time this demonstration was given, Docling itself does not seem to be able reliably to produce a nested table of contents, given a book-like pdf input. This could be remedied by giving the provided script `tcedit` the ability to indent a given bookmark so as to produce a nested table of contents structure. Implementing this feature would make an excellent next step for anyone interested in hacking on the script for their own purposes. 
 
 ## Additional Resources
 
