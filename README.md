@@ -2,7 +2,9 @@
 
 ## About
 
-A workflow demonstration given at International Congress for Medieval Studies, May 16, 2026 in Kalamazoo, Michigan. This was an online session.
+A workflow demonstration given at International Congress for Medieval Studies, May 16, 2026 in Kalamazoo, Michigan. This was an online session. 
+
+The tutorial itself is pitched at an intermediate level. It presumes some familiarity with working at the command line and with the python ecosystem, as well as some basic programming concepts. But if you are a beginner interested in seeing how python might help you do useful things for your work, you are most welcome. If you need a practical, beginner-friendly introduction to Python, I highly recommend Al Sweigart's [*Automate the Boring Stuff with Python*](https://automatetheboringstuff.com).
 
 (This repository has been made public in advance of the live event, so you may be viewing it before I've actually given the talk.)
 
