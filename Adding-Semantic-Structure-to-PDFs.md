@@ -95,42 +95,77 @@ In our example, we will use a born-digital pdf critical edition of the letters o
 ./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
 ```
 
-This outputs a json string containing an array, each element of which is a json object containing a title key and a page key, indicating the title of the section heading and the absolute page number of the pdf on which it occurs.
+This outputs a json string containing an array, each element of which is a json object containing a title key and a page key, indicating the title of the section heading and the absolute page number of the pdf on which it occurs. This string is meant to be passed along to another command for further processing.
 
-The resulting json representation of the table of contents contains some errors, though they are not easy to notice because the output is visually compressed. We will show a way to address that in the next section. 
+The resulting json representation of the table of contents is not easy to read in this display format. As a result, it is hard to check for any errors in the result. This situation can be addressed by piping the result into `./tcedit` without any flags, which will pretty-print the result:
+
+```bash
+./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | ./tcedit
+``` 
+
+Visually inspecting this output leads us to the next phase of the workflow.
 
 ## Phase Two: Update the Table of Contents
 
-The output of `tcgen` is imperfect. It contains some (semantically) duplicate nodes, because Docling treated some headers as two separate headers on the same page. It also contains some basic labelling mistakes. How can we more easily spot them? `tcedit` offers a way.
+Consider the output:
 
-The script `tcedit` receives the json stream from the previous command (here `tcgen`). When given no options, it outputs an enumerated list of bookmark nodes so that the user can inspect them and decide what changes might be necessary. This intermediate representation is intended for the user and not for passing on to another command in the pipeline. In this case, if we invoke it with the same filename as before:
-
-```bash
-./tcedit ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
+```json
+1. {'title': 'EPISTULAE', 'page': 1}
+2. {'title': 'SIGLA  CODICUM', 'page': 2}
+3. {'title': 'ΕΠΙΣΤΟΛΑΙ ΔΙΑΦΟΡΟΙ', 'page': 5}
+4. {'title': 'α ΓΑΙΩΙ  ΘΕΡΑΠΕΥΤΗI', 'page': 6}
+5. {'title': 'ß ΤΩΙ  ΑΥΤΩΙ', 'page': 8}
+6. {'title': 'y', 'page': 9}
+7. {'title': '5', 'page': 10}
+8. {'title': 'ΤΩΙ  ΑΥΤΩΙ', 'page': 10}
+9. {'title': 'ε ΔΩΡΟΘΕΩΙ  ΛΕΙΤΟΥΡΓΩΙ', 'page': 12}
+10. {'title': 'S ΣΩΠΑΤΡΩΙ  IEPEI', 'page': 14}
+11. {'title': 'ι ΠΟΛΥΚΑΡΠΩΙ  ΙΕΡΑΡΧΗΙ', 'page': 15}
+12. {'title': 'η ΔΗΜΟΦΙΛΩΙ  ΘΕΡΑΠΕΥΤΗ I', 'page': 21}
+13. {'title': 'θ', 'page': 43}
+14. {'title': 'ΤΙΤΩΙ  ΊΕΡΑΡΧΗΙ', 'page': 43}
+15. {'title': 'ΊΩΑΝΝΗΙ  ΘΕΟΛΟΓΩΙ,  ΆΠΟΣΤΟΛΩΙ  ΚΑΙ  ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ  ΚΑΤΑ ΠΑΤΜΟΝ  ΤΗΝ  ΝΗΣΟΝ', 'page': 58}
 ```
 
-we will see the enumerated list of bookmark nodes. This reveals the duplicated nodes, as well as nodes that mistakenly treated Greek text like Roman script.
+The output of `tcgen` is imperfect. It contains some (semantically) duplicate nodes, because Docling treated some headers as two separate headers on the same page. It also contains some basic labelling inaccuracies and inconsistencies. Some Greek letters have been interpreted as Roman script, and in one case, as the German "ß." Others are retained as Greek, but read as the wrong Greek letter, or missed entirely.
 
-It can be invoked with the `-d` (or in long form `--delete`) flag, along with the index numbers of the nodes to delete. For example, to delete the seventh and the thirteenth bookmark, one could invoke it as follows:
+The script `tcedit` receives the json stream from the previous command (here `tcgen`). When given no options, it outputs an enumerated list of bookmark nodes so that the user can inspect them and decide what changes might be necessary. This intermediate representation is intended for the user and not for passing on to another command in the pipeline. 
+
+But to fix the problems we need to both delete some nodes and update others. `tcedit` can be invoked with the `-d` (or in long form `--delete`) flag, along with the index numbers of the nodes to delete. For example, to delete the seventh and the thirteenth bookmark, one could invoke it as follows:
 
 ```bash
 ./tcgen ./sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
-./tcedit -d 7 13
+./tcedit -d 7 13 | ./tcedit
 ```
 
-It will output the json string to standard output with the requested nodes deleted.
+It will output the json string to standard output with the requested nodes deleted. But to see the effect of our requested deletion, we can pipe it again into `tcedit`. Notice that it renumbers the nodes to reflect the new count, but the old list remains cached. Each call to `tcedit` makes a transformed copy of its input.
 
-Using the `-u` (long form `--update`) flag, it is possible to make changes to the text of a given node using a KEY=VALUE syntax in which the VALUE is itself a tuple consisting of the portion of the node that needs editing. For example:
+But we still have to fix the inaccuracies in the original list. Using the `-u` (long form `--update`) flag, it is possible to make changes to the text of a given node using a KEY=VALUE syntax in which the VALUE is itself a tuple consisting of the portion of the node that needs editing. For example:
 
 ```bash
 ./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
 ./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
 8="title,δ ΤΩΙ ΑΥΤΩΙ" \
 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
--d 7 13
+-d 7 13 | ./tcedit
 ```
 
-This pipeline updates the title portions of nodes 6, 8, and 14. Both the `-u` and `-d` flags may be used together with the same command. The order in which they are given does not matter. `tcedit` will always perform update operations before the delete operations in a single invocation. Once we are satisfied that the edits are correct, the `-f` (long form `--final`) flag can be added to output it in the form needed for Pdfcpu to apply it to the finished pdf.
+This pipeline updates the title portions of nodes 6, 8, and 14. But we also combined it with the previous call using the `-d` flag. Both the `-u` and `-d` flags may be used together with the same command. The order in which they are given does not matter. In a single invocation, `tcedit` will always perform update operations before the delete operations. Here's a command that makes all the necessary updates and deletions:
+
+```bash
+./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
+./tcedit -u \
+5="title,β ΤΩΙ ΑΥΤΩΙ" \
+6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+10="title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ" \
+11="title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ" \
+12="title,η ΔΗΜΟΦΙΛΩΙ ΘΕΡΑΠΕΥΤΗΙ" \
+14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
+-d 7 13 | ./tcedit
+``` 
+
+As before, we view the output by piping it into another call to `tcedit`. Once we are satisfied that the edits are correct, the `-f` (long form `--final`) flag can be added to output it in the form needed for Pdfcpu to apply it to the finished pdf.
 
 ## Phase Three: Apply the Table of Contents to the PDF file
 
@@ -138,8 +173,13 @@ The final stage of the workflow is to apply the output of the `tcedit` script to
 
 ```bash
 ./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
-./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+./tcedit -u \
+5="title,β ΤΩΙ ΑΥΤΩΙ" \
+6="title,γ ΤΩΙ ΑΥΤΩΙ" \
 8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+10="title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ" \
+11="title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ" \
+12="title,η ΔΗΜΟΦΙΛΩΙ ΘΕΡΑΠΕΥΤΗΙ" \
 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
 -d 7 13 -f | \
 ./tcApply.sh sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
@@ -149,14 +189,19 @@ Note the use of the `-f` flag to finish outputting the result of  `tcedit`, whic
 
 ## Considerations in Real-World Use
 
-On the Unix command line, it is often useful to compose a pipeline with repeated invocations of the same command but with different flags or arguments. Doing this makes it easy to experiment and build up incrementally the desired result. Because the source is never modified directly, one can always repeat new variations of the pipeline until the desired result is achieved, which can then be written to a file. `tcedit` largely conforms to this usage pattern. It can be applied multiple times in the pipeline, breaking up a complex invocation into simple parts. It can always be added to the chain without a flag to inspect the output at that point in the transformation process.
+On the Unix command line, it is often useful to compose a pipeline with repeated invocations of the same command but with different flags or arguments. Doing this makes it easy to experiment and build up incrementally the desired result. Because the source is never modified directly, one can always repeat new variations of the pipeline until the desired result is achieved, which can then be written to a file. `tcedit` largely conforms to this usage pattern. It can be applied multiple times in the pipeline, breaking up a complex invocation into simple parts. One could, for example, work on one error at a time, incrementally building up the pipeline through repeated invocations to the command. If one does that, it is best to save the node deletion step for the end.^[A future version of this script might preserve the original node indices across invocations in order to avoid the need to save the deletion step for the end.] It can always be added to the chain without a flag to inspect the output at that point in the transformation process.
 
 It may also happen that one needs to stop work in the midst of an exploratory session in which one has not completed all desired transformations. In this case, you can redirect the bookmarks object to a file (equivalent to issuing a "Save" command via a GUI). It is possible to reload this file later to resume the transformation process. Here is what that would look like:
 
 ```bash
-./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf |\
-./tcedit -u 6="title,γ ΤΩΙ ΑΥΤΩΙ" \
+./tcgen sources/Pseudo-Dionysius_Areopagita_1991_416.pdf | \
+./tcedit -u \
+5="title,β ΤΩΙ ΑΥΤΩΙ" \
+6="title,γ ΤΩΙ ΑΥΤΩΙ" \
 8="title,δ ΤΩΙ ΑΥΤΩΙ" \
+10="title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ" \
+11="title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ" \
+12="title,η ΔΗΜΟΦΙΛΩΙ  ΘΕΡΑΠΕΥΤΗΙ"
 14="title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ" \
 -d 7 13 > unfinished.json
 ```
@@ -165,10 +210,12 @@ This would save the bookmark list to the file `unfinished.json`. It could easily
 
 ```bash
 cat unfinished.json | ./tcedit -u \
-13="title,ι 'ΊΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ" | ./tcedit
+13="title,ι ᾽ΙΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ \
+ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ" \
+-f | ./tcApply.sh sources/Pseudo-Dionysius_Areopagita_1991_416.pdf
 ```
 
-Here, the contents of the `unfinished.json` file are piped back into the `tcedit` script to complete one more update. The last node in the bookmark list does not begin with a lowercase Greek letter. All the other section headers begin with their appropriate Greek letter in sequence. But with this final transformation accomplished, the last section header matches the format of all the rest.
+Here, the contents of the `unfinished.json` file are piped back into the `tcedit` script to complete one more update. The last node in the bookmark list does not begin with a lowercase Greek letter. All the other section headers begin with their appropriate Greek letter in sequence. But with this final transformation accomplished, the last section header matches the format of all the rest. Note that because the node numbering has changed, we have to take care to specify the correct node when performing this final update.
 
 Docling's ability to output pdf structure as json is a significant advantage because json is so widely used and widely supported. In fact, for more advanced transformation, it is possible to dispense with the `tcedit` script and use `jq`, a robust command line tool for filtering json.[@jq] Just like any other Unix filter, it can be added to the pipeline to achieve whatever transformation is desired. `jq` is out of scope for this tutorial, but it shows what is possible with composable command line tools.
 
@@ -176,11 +223,11 @@ A digital humanist could easily modify and extend these scripts. One could, for 
 
 # Limitations and Summary
 
-The workflow offered here makes the most sense as a tool for an individual scholar or a small team with limited budget. Alternatives exist. One could use a variety of commercially available GUI software tools to edit the document outline of an existing pdf. The most obvious one is Adobe Acrobat, distributed by the company that developed the PDF standard originally. PDFExpert is a powerful (albeit Mac only) alternative. Xodo distributes a free pdf reader that can edit document outlines. Other commercially available software, including web-based tools may have similar or even more advanced capabilities. But of course, commercial solutions cost money and cannot be freely adapted like open source software can. Perhaps more importantly for efficient processing of large personal libraries, they are more complex to automate or cannot be automated at all. The primary advantage that command line tools provide is that Docling can generate a reasonable approximation whose results can be processed in a batch or in an automated fashion. Creating a document outline for a large critical edition by hand would be laborious and error prone. 
+The workflow offered here makes the most sense as a tool for an individual scholar or a small team with limited budget. Alternatives exist. One could use a variety of commercially available GUI software tools to edit the document outline of an existing pdf. The most obvious one is Adobe Acrobat, distributed by the company that developed the PDF standard originally. PDFExpert is a powerful (albeit Mac only) alternative. Xodo distributes a free pdf reader that can edit document outlines. Other commercially available software, including web-based tools may have similar or even more advanced capabilities. But of course, commercial solutions cost money and cannot be freely adapted like open source software can. Perhaps more importantly for efficient processing of large personal libraries, they are more complex to automate or cannot be automated at all. The primary advantage that command line tools provide is that Docling can generate a reasonable approximation whose results can be processed in a batch or in an automated fashion. Creating a document outline for a large critical edition by hand using a GUI tool, however powerful, would be laborious and error prone. 
 
-The scripts offered in this tutorial are proof-of-concept. They have immediate utility, but also a few key limitations that one might want to improve upon in a version adapted for personal use. Most notably, `tcedit` lacks the ability to perform more complex transformations beyond simple node deletion and editing. It cannot nest them as sub-headings. This limitation is also reflected in Docling, which does not seem to be able to reliably interpret the section header hierarchy. In the interest of speed, the `tcgen` script does not perform OCR directly, though this is a capability that Docling offers, and it could be added by adapting the `tcgen` script and installing OCR dependencies on the local system.
+The scripts offered in this tutorial are proof-of-concept. They have immediate utility, but also a few key limitations that one might want to improve upon in a version adapted for personal use. Most notably, `tcedit` lacks the ability to perform more complex transformations beyond simple node deletion and editing. It cannot nest them as sub-headings. This limitation is also reflected in Docling, which does not seem to be able to reliably interpret the section header hierarchy. It cannot search for and replace text--which would be much more efficient in a long series of transformations. In the interest of speed, the `tcgen` script does not perform OCR directly, though this is a capability that Docling offers, and it could be added by adapting the `tcgen` script and installing OCR dependencies on the local system.
 
-Docling allows the creation of powerful command line tools in Python for extracting the information needed for a pdf document outline. Pdfcpu makes it easy to apply this document outline to a file. The result is a more useful digital text. The Unix Software Tools philosophy makes this utility possible by creating an environment in which commands can be iteratively composed, experimented with, and automated. And such tools are available for free with few restrictions on their use.
+In summary, Docling allows the creation of powerful command line tools in Python for extracting the information needed for a pdf document outline. Pdfcpu makes it easy to apply this document outline to a file. The result is a more useful digital text. The Unix Software Tools philosophy makes this utility possible by creating an environment in which commands can be iteratively composed, experimented with, and automated. And such tools are available for free with few restrictions on their use.
 
 \clearpage
 

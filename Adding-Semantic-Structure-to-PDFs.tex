@@ -351,13 +351,42 @@ a json object containing a title key and a page key, indicating the
 title of the section heading and the absolute page number of the pdf on
 which it occurs.
 
-The resulting json representation of the table of contents contains some
-errors, though they are not easy to notice because the output is
-visually compressed. We will show a way to address that in the next
-section.
+The resulting json representation of the table of contents is not easy
+to read because it is visually compressed. As a result, it is hard to
+check for any errors in the result. This can be fixed by piping the
+result into \texttt{./tcedit} without any flags:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \ExtensionTok{./tcedit}
+\end{Highlighting}
+\end{Shaded}
+
+Visually inspecting this output leads us to the next phase of the
+workflow.
 
 \subsection{Phase Two: Update the Table of
 Contents}\label{phase-two-update-the-table-of-contents}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ErrorTok{1.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}EPISTULAE\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{1}\FunctionTok{\}}
+\ErrorTok{2.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}SIGLA}  \ErrorTok{CODICUM\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{2}\FunctionTok{\}}
+\ErrorTok{3.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ΕΠΙΣΤΟΛΑΙ} \ErrorTok{ΔΙΑΦΟΡΟΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{5}\FunctionTok{\}}
+\ErrorTok{4.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}α} \ErrorTok{ΓΑΙΩΙ}  \ErrorTok{ΘΕΡΑΠΕΥΤΗI\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{6}\FunctionTok{\}}
+\ErrorTok{5.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ß} \ErrorTok{ΤΩΙ}  \ErrorTok{ΑΥΤΩΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{8}\FunctionTok{\}}
+\ErrorTok{6.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}y\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{9}\FunctionTok{\}}
+\ErrorTok{7.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}}\DecValTok{5}\ErrorTok{\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{10}\FunctionTok{\}}
+\ErrorTok{8.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ΤΩΙ}  \ErrorTok{ΑΥΤΩΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{10}\FunctionTok{\}}
+\ErrorTok{9.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ε} \ErrorTok{ΔΩΡΟΘΕΩΙ}  \ErrorTok{ΛΕΙΤΟΥΡΓΩΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{12}\FunctionTok{\}}
+\ErrorTok{10.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}S} \ErrorTok{ΣΩΠΑΤΡΩΙ}  \ErrorTok{IEPEI\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{14}\FunctionTok{\}}
+\ErrorTok{11.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ι} \ErrorTok{ΠΟΛΥΚΑΡΠΩΙ}  \ErrorTok{ΙΕΡΑΡΧΗΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{15}\FunctionTok{\}}
+\ErrorTok{12.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}η} \ErrorTok{ΔΗΜΟΦΙΛΩΙ}  \ErrorTok{ΘΕΡΑΠΕΥΤΗ} \ErrorTok{I\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{21}\FunctionTok{\}}
+\ErrorTok{13.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}θ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{43}\FunctionTok{\}}
+\ErrorTok{14.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ΤΙΤΩΙ}  \ErrorTok{ΊΕΡΑΡΧΗΙ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{43}\FunctionTok{\}}
+\ErrorTok{15.} \FunctionTok{\{}\ErrorTok{\textquotesingle{}title\textquotesingle{}}\FunctionTok{:} \ErrorTok{\textquotesingle{}ΊΩΑΝΝΗΙ}  \ErrorTok{ΘΕΟΛΟΓΩΙ}\FunctionTok{,}  \ErrorTok{ΆΠΟΣΤΟΛΩΙ}  \ErrorTok{ΚΑΙ}  \ErrorTok{ΕΥΑΓΓΕΛΙΣΤΗΙ} \ErrorTok{ΠΕΡΙΟΡΙΣΘΕΝΤΙ}  \ErrorTok{ΚΑΤΑ} \ErrorTok{ΠΑΤΜΟΝ}  \ErrorTok{ΤΗΝ}  \ErrorTok{ΝΗΣΟΝ\textquotesingle{}}\FunctionTok{,} \ErrorTok{\textquotesingle{}page\textquotesingle{}}\FunctionTok{:} \DecValTok{58}\FunctionTok{\}}
+\end{Highlighting}
+\end{Shaded}
 
 The output of \texttt{tcgen} is imperfect. It contains some
 (semantically) duplicate nodes, because Docling treated some headers as
@@ -486,7 +515,7 @@ It could easily be picked up again using the standard Unix tool
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{cat}\NormalTok{ unfinished.json }\KeywordTok{|} \ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
-\NormalTok{13=}\StringTok{"title,ι \textquotesingle{}ΊΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ"} \KeywordTok{|} \ExtensionTok{./tcedit}
+\NormalTok{13=}\StringTok{"title,ι ᾽ΙΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ"} \KeywordTok{|} \ExtensionTok{./tcedit}
 \end{Highlighting}
 \end{Shaded}
 
@@ -533,7 +562,8 @@ automate or cannot be automated at all. The primary advantage that
 command line tools provide is that Docling can generate a reasonable
 approximation whose results can be processed in a batch or in an
 automated fashion. Creating a document outline for a large critical
-edition by hand would be laborious and error prone.
+edition by hand using a GUI tool, however powerful, would be laborious
+and error prone.
 
 The scripts offered in this tutorial are proof-of-concept. They have
 immediate utility, but also a few key limitations that one might want to
