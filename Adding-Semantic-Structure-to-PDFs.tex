@@ -136,7 +136,7 @@
 \usepackage{microtype}
 \usepackage{fontspec}
     \defaultfontfeatures{Numbers=OldStyle}
-    \setmainfont{STIX Two Text}
+    \setmainfont{Fira Sans}
 \setmonofont{PragmataPro Mono Liga}
 %\renewcommand{\footnote}[1]{\sidenote{#1}}
 %\renewcommand{\familydefault}{\sfdefault}
@@ -349,12 +349,14 @@ filename as an argument:
 This outputs a json string containing an array, each element of which is
 a json object containing a title key and a page key, indicating the
 title of the section heading and the absolute page number of the pdf on
-which it occurs.
+which it occurs. This string is meant to be passed along to another
+command for further processing.
 
 The resulting json representation of the table of contents is not easy
-to read because it is visually compressed. As a result, it is hard to
-check for any errors in the result. This can be fixed by piping the
-result into \texttt{./tcedit} without any flags:
+to read in this display format. As a result, it is hard to check for any
+errors in the result. This situation can be addressed by piping the
+result into \texttt{./tcedit} without any flags, which will pretty-print
+the result:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -367,6 +369,8 @@ workflow.
 
 \subsection{Phase Two: Update the Table of
 Contents}\label{phase-two-update-the-table-of-contents}
+
+Consider the output:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -391,46 +395,42 @@ Contents}\label{phase-two-update-the-table-of-contents}
 The output of \texttt{tcgen} is imperfect. It contains some
 (semantically) duplicate nodes, because Docling treated some headers as
 two separate headers on the same page. It also contains some basic
-labelling mistakes. How can we more easily spot them? \texttt{tcedit}
-offers a way.
+labelling inaccuracies and inconsistencies. Some Greek letters have been
+interpreted as Roman script, and in one case, as the German ``ß.''
+Others are retained as Greek, but read as the wrong Greek letter, or
+missed entirely.
 
 The script \texttt{tcedit} receives the json stream from the previous
 command (here \texttt{tcgen}). When given no options, it outputs an
 enumerated list of bookmark nodes so that the user can inspect them and
 decide what changes might be necessary. This intermediate representation
 is intended for the user and not for passing on to another command in
-the pipeline. In this case, if we invoke it with the same filename as
-before:
+the pipeline.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\ExtensionTok{./tcedit}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
-\end{Highlighting}
-\end{Shaded}
-
-we will see the enumerated list of bookmark nodes. This reveals the
-duplicated nodes, as well as nodes that mistakenly treated Greek text
-like Roman script.
-
-It can be invoked with the \texttt{-d} (or in long form
-\texttt{-\/-delete}) flag, along with the index numbers of the nodes to
-delete. For example, to delete the seventh and the thirteenth bookmark,
-one could invoke it as follows:
+But to fix the problems we need to both delete some nodes and update
+others. \texttt{tcedit} can be invoked with the \texttt{-d} (or in long
+form \texttt{-\/-delete}) flag, along with the index numbers of the
+nodes to delete. For example, to delete the seventh and the thirteenth
+bookmark, one could invoke it as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \ExtensionTok{./tcgen}\NormalTok{ ./sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
-\ExtensionTok{./tcedit} \AttributeTok{{-}d}\NormalTok{ 7 13}
+\ExtensionTok{./tcedit} \AttributeTok{{-}d}\NormalTok{ 7 13 }\KeywordTok{|} \ExtensionTok{./tcedit}
 \end{Highlighting}
 \end{Shaded}
 
 It will output the json string to standard output with the requested
-nodes deleted.
+nodes deleted. But to see the effect of our requested deletion, we can
+pipe it again into \texttt{tcedit}. Notice that it renumbers the nodes
+to reflect the new count, but the old list remains cached. Each call to
+\texttt{tcedit} makes a transformed copy of its input.
 
-Using the \texttt{-u} (long form \texttt{-\/-update}) flag, it is
-possible to make changes to the text of a given node using a KEY=VALUE
-syntax in which the VALUE is itself a tuple consisting of the portion of
-the node that needs editing. For example:
+But we still have to fix the inaccuracies in the original list. Using
+the \texttt{-u} (long form \texttt{-\/-update}) flag, it is possible to
+make changes to the text of a given node using a KEY=VALUE syntax in
+which the VALUE is itself a tuple consisting of the portion of the node
+that needs editing. For example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -438,18 +438,37 @@ the node that needs editing. For example:
 \ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
-\NormalTok{{-}d 7 13}
+\NormalTok{{-}d 7 13 }\KeywordTok{|} \ExtensionTok{./tcedit}
 \end{Highlighting}
 \end{Shaded}
 
-This pipeline updates the title portions of nodes 6, 8, and 14. Both the
-\texttt{-u} and \texttt{-d} flags may be used together with the same
-command. The order in which they are given does not matter.
-\texttt{tcedit} will always perform update operations before the delete
-operations in a single invocation. Once we are satisfied that the edits
-are correct, the \texttt{-f} (long form \texttt{-\/-final}) flag can be
-added to output it in the form needed for Pdfcpu to apply it to the
-finished pdf.
+This pipeline updates the title portions of nodes 6, 8, and 14. But we
+also combined it with the previous call using the \texttt{-d} flag. Both
+the \texttt{-u} and \texttt{-d} flags may be used together with the same
+command. The order in which they are given does not matter. In a single
+invocation, \texttt{tcedit} will always perform update operations before
+the delete operations. Here's a command that makes all the necessary
+updates and deletions:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
+\NormalTok{5=}\StringTok{"title,β ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{10=}\StringTok{"title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{11=}\StringTok{"title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{12=}\StringTok{"title,η ΔΗΜΟΦΙΛΩΙ ΘΕΡΑΠΕΥΤΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{{-}d 7 13 }\KeywordTok{|} \ExtensionTok{./tcedit}
+\end{Highlighting}
+\end{Shaded}
+
+As before, we view the output by piping it into another call to
+\texttt{tcedit}. Once we are satisfied that the edits are correct, the
+\texttt{-f} (long form \texttt{-\/-final}) flag can be added to output
+it in the form needed for Pdfcpu to apply it to the finished pdf.
 
 \subsection{Phase Three: Apply the Table of Contents to the PDF
 file}\label{phase-three-apply-the-table-of-contents-to-the-pdf-file}
@@ -462,8 +481,13 @@ purpose:
 \begin{Shaded}
 \begin{Highlighting}[]
 \ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
-\ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
+\NormalTok{5=}\StringTok{"title,β ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{10=}\StringTok{"title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{11=}\StringTok{"title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{12=}\StringTok{"title,η ΔΗΜΟΦΙΛΩΙ ΘΕΡΑΠΕΥΤΗΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{{-}d 7 13 }\AttributeTok{{-}f} \KeywordTok{|} \DataTypeTok{\textbackslash{}}
 \ExtensionTok{./tcApply.sh}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
@@ -488,8 +512,14 @@ directly, one can always repeat new variations of the pipeline until the
 desired result is achieved, which can then be written to a file.
 \texttt{tcedit} largely conforms to this usage pattern. It can be
 applied multiple times in the pipeline, breaking up a complex invocation
-into simple parts. It can always be added to the chain without a flag to
-inspect the output at that point in the transformation process.
+into simple parts. One could, for example, work on one error at a time,
+incrementally building up the pipeline through repeated invocations to
+the command. If one does that, it is best to save the node deletion step
+for the end.\footnote{A future version of this script might preserve the
+  original node indices across invocations in order to avoid the need to
+  save the deletion step for the end.} It can always be added to the
+chain without a flag to inspect the output at that point in the
+transformation process.
 
 It may also happen that one needs to stop work in the midst of an
 exploratory session in which one has not completed all desired
@@ -500,10 +530,15 @@ Here is what that would look like:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|}\DataTypeTok{\textbackslash{}}
-\ExtensionTok{./tcedit} \AttributeTok{{-}u}\NormalTok{ 6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcgen}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf }\KeywordTok{|} \DataTypeTok{\textbackslash{}}
+\ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
+\NormalTok{5=}\StringTok{"title,β ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{6=}\StringTok{"title,γ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{8=}\StringTok{"title,δ ΤΩΙ ΑΥΤΩΙ"} \DataTypeTok{\textbackslash{}}
-\NormalTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{10=}\StringTok{"title,ϛ ΣΩΠΑΤΡΩΙ ΙEPEΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{11=}\StringTok{"title,ζ ΠΟΛΥΚΑΡΠΩΙ ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{12=}\StringTok{"title,η ΔΗΜΟΦΙΛΩΙ  ΘΕΡΑΠΕΥΤΗΙ"}
+\ExtensionTok{14=}\StringTok{"title,θ ΤΙΤΩΙ ᾽ΙΕΡΑΡΧΗΙ"} \DataTypeTok{\textbackslash{}}
 \NormalTok{{-}d 7 13 }\OperatorTok{\textgreater{}}\NormalTok{ unfinished.json}
 \end{Highlighting}
 \end{Shaded}
@@ -515,7 +550,9 @@ It could easily be picked up again using the standard Unix tool
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{cat}\NormalTok{ unfinished.json }\KeywordTok{|} \ExtensionTok{./tcedit} \AttributeTok{{-}u} \DataTypeTok{\textbackslash{}}
-\NormalTok{13=}\StringTok{"title,ι ᾽ΙΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ"} \KeywordTok{|} \ExtensionTok{./tcedit}
+\NormalTok{13=}\StringTok{"title,ι ᾽ΙΩΑΝΝΗΙ ΘΕΟΛΟΓΩΙ, ΆΠΟΣΤΟΛΩΙ ΚΑΙ }\DataTypeTok{\textbackslash{}}
+\StringTok{ΕΥΑΓΓΕΛΙΣΤΗΙ ΠΕΡΙΟΡΙΣΘΕΝΤΙ ΚΑΤΑ ΠΑΤΜΟΝ ΤΗΝ ΝΗΣΟΝ"} \DataTypeTok{\textbackslash{}}
+\NormalTok{{-}f }\KeywordTok{|} \ExtensionTok{./tcApply.sh}\NormalTok{ sources/Pseudo{-}Dionysius\_Areopagita\_1991\_416.pdf}
 \end{Highlighting}
 \end{Shaded}
 
@@ -524,7 +561,9 @@ into the \texttt{tcedit} script to complete one more update. The last
 node in the bookmark list does not begin with a lowercase Greek letter.
 All the other section headers begin with their appropriate Greek letter
 in sequence. But with this final transformation accomplished, the last
-section header matches the format of all the rest.
+section header matches the format of all the rest. Note that because the
+node numbering has changed, we have to take care to specify the correct
+node when performing this final update.
 
 Docling's ability to output pdf structure as json is a significant
 advantage because json is so widely used and widely supported. In fact,
@@ -572,18 +611,21 @@ improve upon in a version adapted for personal use. Most notably,
 transformations beyond simple node deletion and editing. It cannot nest
 them as sub-headings. This limitation is also reflected in Docling,
 which does not seem to be able to reliably interpret the section header
-hierarchy. In the interest of speed, the \texttt{tcgen} script does not
-perform OCR directly, though this is a capability that Docling offers,
-and it could be added by adapting the \texttt{tcgen} script and
-installing OCR dependencies on the local system.
+hierarchy. It cannot search for and replace text--which would be much
+more efficient in a long series of transformations. In the interest of
+speed, the \texttt{tcgen} script does not perform OCR directly, though
+this is a capability that Docling offers, and it could be added by
+adapting the \texttt{tcgen} script and installing OCR dependencies on
+the local system.
 
-Docling allows the creation of powerful command line tools in Python for
-extracting the information needed for a pdf document outline. Pdfcpu
-makes it easy to apply this document outline to a file. The result is a
-more useful digital text. The Unix Software Tools philosophy makes this
-utility possible by creating an environment in which commands can be
-iteratively composed, experimented with, and automated. And such tools
-are available for free with few restrictions on their use.
+In summary, Docling allows the creation of powerful command line tools
+in Python for extracting the information needed for a pdf document
+outline. Pdfcpu makes it easy to apply this document outline to a file.
+The result is a more useful digital text. The Unix Software Tools
+philosophy makes this utility possible by creating an environment in
+which commands can be iteratively composed, experimented with, and
+automated. And such tools are available for free with few restrictions
+on their use.
 
 \clearpage
 

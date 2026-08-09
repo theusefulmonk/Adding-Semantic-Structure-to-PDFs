@@ -35,7 +35,7 @@ header-includes:
     \usepackage{microtype}
     \usepackage{fontspec}
 		\defaultfontfeatures{Numbers=OldStyle}
-		\setmainfont{STIX Two Text}
+		\setmainfont{Fira Sans}
     \setmonofont{PragmataPro Mono Liga}
     %\renewcommand{\footnote}[1]{\sidenote{#1}}
     %\renewcommand{\familydefault}{\sfdefault}
