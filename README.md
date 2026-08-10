@@ -105,7 +105,7 @@ pip install -r requirements.txt
 
 ### Using Nix
 
-Note: Nix is the best way to ensure a reproducible environment, but using it is probably most suited to more advanced users. Assuming you have the nix package manager installed, then within the directory
+Note: Nix is the best way to ensure a reproducible environment on any machine that supports nix, but using it is probably most suited to more advanced users. Assuming you have the nix package manager installed, then within the directory, issue the following command:
 
 ```
 nix develop
@@ -115,7 +115,15 @@ nix develop
 direnv allow
 ```
 
-Either approach will automatically set up your environment with the precise versions of python, docling, and pdfcpu you need to run the scripts.
+Either approach will automatically set up your environment with the precise versions of python and pdfcpu used to develop the scripts. Once the environment is active, run 
+
+```
+uv sync --frozen
+# and then
+source .venv/bin/activate
+```
+
+This will install docling into the virtual environment.
 
 ## Current Limitations
 
