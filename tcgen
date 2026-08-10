@@ -69,6 +69,7 @@ def main():
         # print("Using cached results. Invoke with -B to force regeneration")
         cache.close()
     else:
+        cache.close()
         # intermediate representation produced by Docling:
         docling_result = converter.convert(source)
 
