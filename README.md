@@ -70,7 +70,7 @@ source ./.venv/bin/activate
 Your shell prompt will likely change to indicate that the virtual environment is active. You can check by issuing the command `which python` which should return the path to the python interpreter in the virtual environment directory (`.venv`, if you've been following this example). Finally, install the required dependencies:
 
 ```
-pip install docling
+python -m pip install docling==2.65.0
 ```
 
 The final step of applying the table of contents to the pdf relies on `pdfcpu`.
@@ -80,7 +80,11 @@ https://pdfcpu.io/getting_started/install_cli/?src=docs
 
 One note of caution: depending on your distribution of Linux, `pdfcpu` may be out of date in your distribution's package manager. You need a version ≥ 0.11.1. You may need to install it manually. But you may find it more convenient to use [`homebrew`](https://brew.sh).
 
-If you want to try to recreate the environment used in this demonstration exactly, a `requirements.txt` file has been made available. But you need to ensure that you are running python 3.11 and using same platform and architecture (MacOS and Apple Silicon) as was used in the demonstration.  
+If you want to try to recreate the environment used in this demonstration exactly, you have two options: (1) use the provided `requirements.txt` or (2) use the provided nix flake. 
+
+### Using `Requirements.txt`
+
+Ensure that you are running python 3.11 and using same platform and architecture (MacOS and Apple Silicon) as was used in the demonstration.  
 
 Assuming python 3.11 is already
 installed on your system, and is available in your PATH, start by creating a
@@ -98,6 +102,20 @@ environment activated, you can then call
 ```
 pip install -r requirements.txt
 ```
+
+### Using Nix
+
+Note: Nix is the best way to ensure a reproducible environment, but using it is probably most suited to more advanced users. Assuming you have the nix package manager installed, then within the directory
+
+```
+nix develop
+
+# Or, if you are using direnv, you can take advantage of the provided .envrc
+
+direnv allow
+```
+
+Either approach will automatically set up your environment with the precise versions of python, docling, and pdfcpu you need to run the scripts.
 
 ## Current Limitations
 
